@@ -1,5 +1,5 @@
 
-![Logo](logo.png)
+<img src="logo.png" width="250" />
 
 # Ronin – Lightweight Dev Container Orchestrator
 
