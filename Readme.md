@@ -1,3 +1,6 @@
+
+![Logo](logo.png)
+
 # Ronin – Lightweight Dev Container Orchestrator
 
 Ronin ist ein schlankes CLI-Tool zur Verwaltung von Entwicklungscontainern auf Basis von `systemd-nspawn`. Es ist gedacht für Entwickler, die systemnahe Isolierung und einfache Reproduzierbarkeit ohne OCI-Daemon benötigen – ideal als Alternative zu Toolbox oder Docker für Fedora-Workstations.
