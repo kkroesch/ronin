@@ -1,0 +1,29 @@
+@startuml RoninCluster
+
+skinparam linetype ortho
+
+package "Ronin Cluster" {
+  node "Worker Node 1" as W1 {
+    [systemd-nspawn Container A]
+    [systemd-nspawn Container B]
+  }
+
+  node "Worker Node 2" as W2 {
+    [systemd-nspawn Container C]
+  }
+
+  database "Shared FS (NFS/Gluster/Ceph)" as FS
+  cloud "Git Repo / Deployment Configs" as Git
+  artifact "Overlay Network (Open vSwitch)" as Net
+  component "Ronin CLI\n(ansible + rsync + ssh)" as CLI
+
+  CLI --> Git : pull configs
+  CLI --> W1 : ssh + rsync deploy
+  CLI --> W2 : ssh + rsync deploy
+  W1 --> FS : mount
+  W2 --> FS : mount
+  W1 --> Net
+  W2 --> Net
+}
+
+@enduml

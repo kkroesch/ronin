@@ -1,0 +1,119 @@
+#!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+INIT_SCRIPT="$SCRIPT_DIR/ronin-init.sh"
+
+warn() {
+  echo -e "\e[38;5;208m⚠️  $1\e[0m"
+}
+
+fatal() {
+  echo -e "\e[31m❌ $1\e[0m" >&2
+  exit 1
+}
+
+success() {
+  echo -e "\e[32m✅ $1\e[0m"
+}
+
+info() {
+  echo -e "\e[36mℹ️  $1\e[0m"
+}
+
+progress() {
+  echo -ne "\e[33m⏳ $1...\e[0m"
+}
+
+done() {
+  echo -e "\e[32m done\e[0m"
+}
+
+usage() {
+  echo "Usage: ronin <command> [name] [-- <args>]"
+  echo ""
+  echo "Commands:"
+  echo "  init <name>       Initialize a new container"
+  echo "  list              Show all containers"
+  echo "  start <name>      Start container"
+  echo "  stop <name>       Stop container"
+  echo "  shell <name>      Shell into container"
+  echo "  exec <name> -- <command>  Run command in container"
+  echo "  rm <name>         Stop and remove container"
+  exit 1
+}
+
+if [[ $# -lt 1 ]]; then
+  usage
+fi
+
+COMMAND="$1"
+shift
+NAME="${1:-}"
+
+case "$COMMAND" in
+  init)
+    if [[ -z "$NAME" ]]; then
+      fatal "Usage: ronin init <name>"
+    fi
+    progress "Creating container '$NAME'"
+    sudo "$INIT_SCRIPT" "$NAME"
+    done
+    success "Container '$NAME' initialized"
+    ;;
+
+  list)
+    sudo machinectl list
+    ;;
+
+  start)
+    if [[ -z "$NAME" ]]; then
+      fatal "Usage: ronin start <name>"
+    fi
+    sudo machinectl start "$NAME"
+    ;;
+
+  stop)
+    if [[ -z "$NAME" ]]; then
+      fatal "Usage: ronin stop <name>"
+    fi
+    sudo machinectl poweroff "$NAME"
+    ;;
+
+  shell)
+    if [[ -z "$NAME" ]]; then
+      fatal "Usage: ronin shell <name>"
+    fi
+    sudo machinectl shell "$NAME"
+    ;;
+
+  exec)
+    if [[ -z "$NAME" ]]; then
+      fatal "Usage: ronin exec <name> -- <command>"
+    fi
+    shift
+    if [[ "$1" != "--" ]]; then
+      fatal "Error: exec requires -- separator before command"
+    fi
+    shift
+    sudo machinectl shell "$NAME" /bin/sh -c "$*"
+    ;;
+
+  rm)
+    if [[ -z "$NAME" ]]; then
+      fatal "Usage: ronin rm <name>"
+    fi
+    warn "Stopping $NAME ..."
+    sudo machinectl poweroff "$NAME" || true
+    warn "Terminating $NAME ..."
+    sudo machinectl terminate "$NAME" || true
+    warn "Removing files ..."
+    sudo rm -rf "/var/lib/machines/$NAME"
+    sudo rm -f "/etc/systemd/nspawn/$NAME.nspawn"
+    success "Container '$NAME' removed"
+    ;;
+
+  *)
+    usage
+    ;;
+esac
