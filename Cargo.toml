@@ -1,0 +1,22 @@
+[package]
+name = "ronin"
+version = "0.1.0"
+edition = "2024"
+authors = ["Karsten Kroesch <karsten.kroesch@example.com>"]
+description = "Minimalist container runtime using Linux syscalls – no Docker, no Podman, no daemon."
+license = "MIT"
+repository = "https://github.com/kkroesch/ronin"
+readme = "README.md"
+keywords = ["container", "linux", "syscall", "namespace", "rootless", "minimalist"]
+categories = ["command-line-utilities", "system-tools", "virtualization"]
+
+[dependencies]
+clap = { version = "4.5", features = ["derive"] }
+nix = { version = "0.29", features = ["eventfd"] }
+cgroups-rs = "0.5"
+anyhow = "1.0"
+thiserror = "1.0"
+log = "0.4"
+env_logger = "0.10"
+
+[dev-dependencies]
