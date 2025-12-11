@@ -1,0 +1,15 @@
+[package]
+name = "ronin-cli"
+version = "0.1.0"
+edition = "2021"
+authors = ["Karsten Kroesch <karsten.kroesch@example.com>"]
+description = "Ronin control program."
+license = "MIT"
+
+[dependencies]
+nix = { workspace = true }
+anyhow = { workspace = true }
+log = { workspace = true }
+env_logger = { workspace = true }
+cgroups-rs = { workspace = true }
+clap = { version = "4.5.53", features = ["derive"] }

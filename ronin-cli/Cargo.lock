@@ -713,7 +713,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7a2d987857b319362043e95f5353c0535c1f58eec5336fdfcf626430af7def58"
 
 [[package]]
-name = "ronin-cli"
+name = "ronin"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -722,17 +722,7 @@ dependencies = [
  "env_logger",
  "log",
  "nix 0.29.0",
-]
-
-[[package]]
-name = "ronin-init"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "cgroups-rs",
- "env_logger",
- "log",
- "nix 0.29.0",
+ "thiserror",
 ]
 
 [[package]]

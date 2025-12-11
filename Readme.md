@@ -1,72 +1,145 @@
 
-<img src="logo.png" width="250" />
+<img src="logo.png" width="250" style="text-align: center;" />
 
-# Ronin – Lightweight Dev Container Orchestrator
+# Ronin 🐉
 
-Ronin ist ein schlankes CLI-Tool zur Verwaltung von Entwicklungscontainern auf Basis von `systemd-nspawn`. Es ist gedacht für Entwickler, die systemnahe Isolierung und einfache Reproduzierbarkeit ohne OCI-Daemon benötigen – ideal als Alternative zu Toolbox oder Docker für Fedora-Workstations.
+> Minimalist container runtime using Linux syscalls — no Docker, no Podman, no daemon.
 
----
+Ronin is a [Rust](https://www.rust-lang.org/)-based container tool that uses **Linux kernel features** (namespaces, cgroups, mount, chroot) to run isolated processes — without any external dependencies.
 
-## 🛠 Voraussetzungen
+Perfect for developers who want full control, transparency, and no vendor lock-in.
 
-* **Betriebssystem**: Fedora 39 oder neuer
-* **Pakete** (werden automatisch installiert):
+## 🚀 Features
 
-  * `systemd-container`
-  * `dnf` (hostseitig)
-
----
+- ✅ Rootless by default
+- ✅ No daemon, no images, no registries
+- ✅ Uses Linux syscalls directly (`unshare`, `mount`, `chroot`, `pivot_root`)
+- ✅ CLI with `clap` — intuitive and extensible
+- ✅ Built in Rust — safe, fast, portable
+- ✅ Works on any Linux system with kernel ≥ 4.18
 
 ## 📦 Installation
 
+Ronin is **not yet released** — you need to build it from source.
+
+### Prerequisites
+
+- Rust (≥ 1.70)
+- `gcc`, `make`, `pkg-config` (for native dependencies)
+- Linux kernel with support for:
+  - Namespaces (`CLONE_NEWNS`, `CLONE_NEWPID`, etc.)
+  - cgroups v2 (optional, for resource limits)
+  - `mount`, `chroot`, `pivot_root`
+
+> 💡 **Recommended setup**:  
+> Use **Fedora Silverblue** + **distrobox** with `fedora:42` image — perfect for kernel experiments.
+
+## 🛠️ Development
+
+To build and test Ronin locally, follow these steps:
+
+### 1. Install Rust
+
 ```bash
-git clone https://github.com/youruser/ronin.git
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+### 2. Install C toolchain (required for `nix`, `libc`, `cgroups-rs`)
+
+```bash
+sudo dnf install -y gcc make pkg-config clang
+```
+
+> 🐧 **On Fedora Silverblue / distrobox**:  
+> Run this inside your `distrobox` — not on the host.
+
+### 3. Clone the repo
+
+```bash
+git clone https://github.com/kkroesch/ronin.git
 cd ronin
-chmod +x ronin ronin-init.sh
-sudo cp ronin /usr/local/bin/
 ```
 
----
-
-## 🚀 Schnellstart
+### 4. Build
 
 ```bash
-ronin init web1      # Erstellt neuen Container "web1" (Fedora @core)
-ronin start web1     # Startet den Container
-ronin shell web1     # Wechselt in eine Root-Shell im Container
-ronin exec web1 -- dnf install gcc make
-ronin stop web1      # Beendet den Container
-ronin rm web1        # Entfernt Container und Konfiguration
+cargo build
 ```
 
----
-
-## 🔍 Befehlsübersicht
+### 5. Run tests (if any)
 
 ```bash
-ronin init <name>       # Erstellt RootFS und .nspawn-Datei
-ronin list              # Zeigt alle Maschinen
-ronin start <name>      # Startet Maschine via machinectl
-ronin stop <name>       # Stoppt Container (systemd poweroff)
-ronin shell <name>      # Rootshell im Container (systemd-nspawn)
-ronin exec <name> -- <cmd>  # Führt Befehl im Container aus
-ronin rm <name>         # Beendet und entfernt Containerdateien
+cargo test
 ```
 
----
+### 6. Run locally
 
-## 🌐 Netzwerk
+```bash
+cargo run -- run --root /tmp/rootfs --mount /host/app:/app --port 3000:3000 /bin/bash
+```
 
-Ronin legt automatisch eine Bridge `br0` mit DHCP ein – dein Container erhält dadurch eine IP und kann ins Internet.
-
----
-
-## ❓ Fragen & Roadmap
-
-* Unterstützung für Benutzercontainer (rootless)?
-* Templates / Profile für Sprachumgebungen (Rust, Python ...)?
-* Mount-Presets (`~/dev → /mnt/dev`)?
+> 📝 **Note**: You need a valid rootfs (e.g., from `docker export` or `buildah`).
 
 ---
 
-Mit Ronin hast du eine systemnahe, performante und transparente Umgebung, ganz ohne Images und Daemons. Ideal für Nerds mit Root.
+## 📜 Usage
+
+### Run a container
+
+```bash
+ronin run --root /path/to/rootfs --mount /host/dir:/container/dir --port 3000:3000 --user 1000 /bin/bash
+```
+
+### Available subcommands
+
+- `run` — Start a container
+- `build` — (future) Build a rootfs
+- `exec` — (future) Execute command in running container
+- `ps` — (future) List containers
+- `rm` — (future) Remove container
+
+---
+
+## 🧩 Architecture
+
+Ronin is built in Rust with:
+
+- `clap` — for CLI parsing
+- `nix` — for Linux syscalls (namespaces, mount, chroot)
+- `cgroups-rs` — for resource limits (CPU, RAM, IO)
+- `anyhow` — for error handling
+- `env_logger` — for debugging
+
+Modules are split into:
+
+- `src/main.rs` — CLI entry point
+- `src/run.rs` — Container execution logic
+- `src/build.rs` — (future) Image building
+- `src/exec.rs` — (future) Command execution
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please:
+
+1. Fork the repo
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+MIT — see [LICENSE](LICENSE) for details.
+
+---
+
+## 🙏 Thanks
+
+Ronin is inspired by the simplicity of Linux kernel features — and the desire to avoid Docker’s complexity.
+
+Made with ❤️ by [Karsten Kroesch](https://github.com/kkroesch).
+```

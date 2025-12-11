@@ -1,0 +1,14 @@
+[package]
+name = "ronin-init"
+version = "0.1.0"
+edition = "2021"
+authors = ["Karsten Kroesch <karsten.kroesch@example.com>"]
+description = "Minimal init process for Ronin containers."
+license = "MIT"
+
+[dependencies]
+nix = { workspace = true }
+anyhow = { workspace = true }
+log = { workspace = true }
+env_logger = { workspace = true }
+cgroups-rs = { workspace = true }
